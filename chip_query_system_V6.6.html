@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED 固件智能生态查询系统 v6.6</title>
+    <style>
+        :root {
+            --sf-black: #1d1d1f;
+            --sf-gray-dark: #424245;
+            --sf-gray-light: #f5f5f7;
+            --sf-border: #d2d2d7;
+            --sf-accent: #0071e3;
+            --sf-accent-hover: #0077ed;
+            --sf-success: #34c759;
+            --sf-danger: #ff3b30;
+            --sf-card-bg: rgba(255, 255, 255, 0.85);
+            --radius-main: 20px;
+            --radius-inner: 12px;
+            --ease-apple: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* 基础样式重置 */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+        body { background-color: var(--sf-gray-light); color: var(--sf-black); padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        
+        .container { width: 100%; max-width: 900px; margin: 0 auto; }
+        
+        /* 苹果标志性居中极简 Header */
+        header { margin-bottom: 40px; text-align: center; animation: fadeInHeader 0.8s var(--ease-apple); }
+        header h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.5px; color: var(--sf-black); margin-bottom: 10px; }
+        header p { color: var(--sf-gray-dark); font-size: 16px; font-weight: 400; }
+        
+        /* 苹果胶囊式无缝切换导航条 */
+        .nav-tabs-container { display: flex; justify-content: center; margin-bottom: 40px; }
+        .nav-tabs { display: inline-flex; background: rgba(0, 0, 0, 0.05); padding: 4px; border-radius: 30px; backdrop-filter: blur(20px); position: relative; }
+        .tab-btn { padding: 8px 32px; font-size: 14px; font-weight: 500; border: none; background: transparent; color: var(--sf-gray-dark); cursor: pointer; border-radius: 25px; transition: all 0.3s var(--ease-apple); outline: none; }
+        .tab-btn:hover { color: var(--sf-black); }
+        .tab-btn.active { background-color: #fff; color: var(--sf-black); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+
+        /* 视窗容器 */
+        .panels-window { position: relative; width: 100%; min-height: 400px; }
+        .page-panel { width: 100%; position: absolute; top: 0; left: 0; opacity: 0; transform: translateY(15px) scale(0.99); pointer-events: none; transition: opacity 0.4s var(--ease-apple), transform 0.4s var(--ease-apple); }
+        .page-panel.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; position: relative; }
+        
+        /* 经典苹果圆角白色微阴影卡片 */
+        .card { background: var(--sf-card-bg); border-radius: var(--radius-main); border: 1px solid rgba(0,0,0,0.03); padding: 36px; box-shadow: 0 8px 30px rgb(0 0 0 / 4%); backdrop-filter: blur(20px); margin-bottom: 25px; }
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 24px; color: var(--sf-black); letter-spacing: -0.2px; }
+        
+        /* 苹果风输入框组 */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--sf-gray-dark); padding-left: 2px; }
+        .input-container { position: relative; width: 100%; }
+        .form-control { width: 100%; padding: 14px 16px; font-size: 15px; border: 1px solid var(--sf-border); border-radius: var(--radius-inner); background-color: rgba(255,255,255,0.8); outline: none; transition: all 0.25s var(--ease-apple); color: var(--sf-black); }
+        .form-control:focus { border-color: var(--sf-accent); background-color: #fff; box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15); }
+        .form-control::placeholder { color: #86868b; font-weight: 400; }
+
+        /* 交互按钮组 */
+        .btn { width: 100%; padding: 14px; background-color: var(--sf-accent); color: white; border: none; border-radius: var(--radius-inner); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s var(--ease-apple); text-align: center; text-decoration: none; display: block; }
+        .btn:hover { background-color: var(--sf-accent-hover); }
+        .btn:active { transform: scale(0.985); opacity: 0.95; }
+        .btn-success { background-color: var(--sf-success); }
+        .btn-success:hover { background-color: #2ea84b; }
+        .btn-outline { background-color: rgba(0,0,0,0.03); color: var(--sf-accent); border: 1px solid transparent; }
+        .btn-outline:hover { background-color: rgba(0, 113, 227, 0.08); }
+        .btn-danger { background-color: rgba(255,59,48,0.1); padding: 6px 12px; font-size: 12px; border-radius: 6px; color: var(--sf-danger); border: none; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-danger:hover { background-color: var(--sf-danger); color: white; }
+        .btn-clear { background-color: transparent; color: #86868b; font-size: 12px; margin-top: 15px; text-decoration: underline; border: none; cursor: pointer; }
+        .btn-clear:hover { color: var(--sf-danger); }
+
+        .file-ops { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 5px; }
+        
+        /* 结果通知盒 */
+        .result-box { margin-top: 24px; padding: 24px; border-radius: var(--radius-inner); background-color: #fff; border: 1px solid var(--sf-border); display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s var(--ease-apple); }
+        .result-box.show { display: block; opacity: 1; transform: translateY(0); }
+        .result-title { font-size: 12px; color: #86868b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .result-value { font-size: 28px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.5px; }
+        .result-detail { font-size: 14px; border-top: 1px solid var(--sf-gray-light); padding-top: 14px; line-height: 1.6; color: var(--sf-gray-dark); }
+
+        /* 后台布局 */
+        @media (min-width: 768px) { .grid-layout-admin { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; } }
+        
+        /* 表格样式 */
+        .full-width { margin-top: 24px; padding: 24px; }
+        .table-container { overflow-x: auto; max-height: 400px; overflow-y: auto; border-radius: var(--radius-inner); border: 1px solid rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; background: #fff; }
+        th { background-color: var(--sf-gray-light); color: var(--sf-gray-dark); font-weight: 500; padding: 14px; position: sticky; top: 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; }
+        td { padding: 14px; border-bottom: 1px solid rgba(0,0,0,0.03); color: var(--sf-black); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #fafafa; }
+        
+        /* 微标 */
+        .badge { display: inline-block; padding: 3px 8px; font-size: 12px; font-weight: 500; border-radius: 6px; background-color: rgba(0, 113, 227, 0.06); color: var(--sf-accent); }
+        .badge-package { background-color: rgba(139, 92, 246, 0.08); color: #6d28d9; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
+        .storage-status { font-size: 12px; color: var(--sf-success); font-weight: 400; text-align: right; margin-top: 10px; }
+        .hidden-file-input { display: none; }
+        .search-card-width { max-width: 550px; margin: 0 auto; }
+
+        /* 模糊匹配多结果卡片样式 */
+        .fuzzy-card { background: #fff; border: 1px solid rgba(0,0,0,0.06); padding: 14px; border-radius: var(--radius-inner); box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 10px; transition: transform 0.2s; }
+        .fuzzy-card:hover { transform: translateY(-2px); border-color: rgba(0, 113, 227, 0.2); }
+
+        @keyframes fadeInHeader {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>固件生态智能查询</h1>
+        <p>一体化多维匹配与程序分发系统</p>
+    </header>
+
+    <div class="nav-tabs-container">
+        <div class="nav-tabs">
+            <button id="btn_tab_search" class="tab-btn active" onclick="switchTab('search')">🔍 智能匹配</button>
+            <button id="btn_tab_admin" class="tab-btn" onclick="switchTab('admin')">⚙️ 数据仓库</button>
+        </div>
+    </div>
+
+    <div class="panels-window">
+        
+        <div id="panel_search" class="page-panel active">
+            <div class="card search-card-width">
+                <div class="card-title">驱动与控制卡匹配</div>
+                
+                <div class="form-group">
+                    <label>模组驱动 IC 型号</label>
+                    <div class="input-container">
+                        <input type="text" id="search_driver" class="form-control" placeholder="输入关键字，如: 5124 (留空查所有)" list="driver_list">
+                        <datalist id="driver_list"></datalist>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>接收卡型号</label>
+                    <div class="input-container">
+                        <input type="text" id="search_card" class="form-control" placeholder="输入关键字，如: 908 (留空查所有)" list="card_list">
+                        <datalist id="card_list"></datalist>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="executeQuery()">检索可用固件</button>
+
+                <div id="result_box" class="result-box">
+                    <div id="res_title" class="result-title">最新推荐固件程序版本</div>
+                    <div id="res_version" class="result-value">-</div>
+                    <div id="res_detail" class="result-detail"></div>
+                    <div id="download_btn_container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel_admin" class="page-panel">
+            <div class="grid-layout-admin">
+                <div class="card">
+                    <div class="card-title">信息录入</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="form-group">
+                            <label>驱动 IC *</label>
+                            <input type="text" id="add_module_ic" class="form-control" placeholder="如: MBI5124">
+                        </div>
+                        <div class="form-group">
+                            <label>软件可选 IC</label>
+                            <input type="text" id="add_software_ic" class="form-control" placeholder="选填">
+                        </div>
+                        <div class="form-group">
+                            <label>接收卡 *</label>
+                            <input type="text" id="add_card_model" class="form-control" placeholder="如: RV908">
+                        </div>
+                        <div class="form-group">
+                            <label>固件版本 *</label>
+                            <input type="text" id="add_version" class="form-control" placeholder="如: V4.5">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>关联固件程序包 *</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="add_package_name" class="form-control" placeholder="选择资产或键入文件名" style="background-color: rgba(0,0,0,0.01);">
+                            <button class="btn btn-outline" style="margin-top:0; width:100px; padding:0; font-size:13px;" onclick="document.getElementById('package_file_picker').click()">选择文件</button>
+                            <input type="file" id="package_file_picker" class="hidden-file-input" onchange="handlePackageSelection(this)">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>备注</label>
+                        <input type="text" id="add_remarks" class="form-control" placeholder="附加硬件条件或批次（选填）">
+                    </div>
+                    <button class="btn btn-success" onclick="addNewData()">确认部署规则</button>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title">数据备份与导入</div>
+                        <p style="font-size: 13px; color: var(--sf-gray-dark); margin-bottom: 20px; line-height: 1.6;">
+                            系统无缝向下兼容标准 Excel (CSV) 编码。您可以一键备份云端规则，或批量下发外部配置文件。
+                        </p>
+                        <div class="file-ops">
+                            <button class="btn btn-outline" onclick="exportToCSV()">备份数据 (CSV)</button>
+                            <button class="btn btn-outline" onclick="document.getElementById('csv_file_input').click()">导入更新</button>
+                            <input type="file" id="csv_file_input" class="hidden-file-input" accept=".csv" onchange="importFromCSV(this)">
+                        </div>
+                        <div id="storage_tip" class="storage-status">✓ 状态：数据已同步固定本地存储</div>
+                        <center><button class="btn btn-clear" onclick="clearStorageData()">重置清空系统所有矩阵</button></center>
+                    </div>
+
+                    <div class="card" style="margin-bottom: 0;">
+                        <div class="card-title">🌐 GitHub 云端分发源配置</div>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                            <input type="checkbox" id="gh_enable" onchange="saveGitHubConfig()" style="width:18px; height:18px; cursor:pointer;">
+                            <label for="gh_enable" style="margin-bottom:0; cursor:pointer; font-weight:600; color:var(--sf-accent);">启用 GitHub 远程下载</label>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label>GitHub 用户名</label>
+                                <input type="text" id="gh_user" class="form-control" placeholder="例如: zhangsan" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label>仓库名称</label>
+                                <input type="text" id="gh_repo" class="form-control" placeholder="例如: led-firmware" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>分支 (默认 main)</label>
+                                <input type="text" id="gh_branch" class="form-control" placeholder="main" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>目录 (默认 packages)</label>
+                                <input type="text" id="gh_folder" class="form-control" placeholder="packages" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
+                            </div>
+                        </div>
+                        <p style="font-size: 11px; color: #86868b; margin-top: 12px; line-height: 1.4;">
+                            * 提示：开启后，下载时系统会自动组装为 <code>raw.githubusercontent</code> 高速直连链。请确保您的目标仓库为 <b>Public (公开)</b> 状态。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card full-width">
+                <div class="card-title">全局集成矩阵索引 (<span id="data_count">0</span> 条持久化数据)</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>驱动 IC</th>
+                                <th>软件可选 IC</th>
+                                <th>接收卡</th>
+                                <th>固件版本</th>
+                                <th>固件程序包</th>
+                                <th>备注</th>
+                                <th style="width: 60px; text-align: center;">控制</th>
+                            </tr>
+                        </thead>
+                        <tbody id="database_body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultDatabase = [
+        { module_ic: "MBI5124", software_ic: "MBI5124 (通用)", card_model: "RV908", version: "V4.5.0.2", package_name: "RV908_MBI5124_V4.5.0.2.bin", remarks: "常规生产推荐版" },
+        { module_ic: "ICN2037", software_ic: "ICN2037 (常规)", card_model: "RV908", version: "V4.6.1.0", package_name: "RV908_ICN2037_V4.6.1.0.hex", remarks: "低灰阶增益修正版" },
+        { module_ic: "MBI5153", software_ic: "MBI5153 (高刷)", card_model: "RV926", version: "V5.0.1.1", package_name: "RV926_MBI5153_V5.0.1.1.bin", remarks: "小间距高刷专用" }
+    ];
+
+    let currentDatabase = [];
+
+    window.onload = function() {
+        loadFromLocalStorage();
+        loadGitHubConfig(); // 载入 GitHub 配置
+        refreshUI();
+    };
+
+    function switchTab(tabName) {
+        const btnSearch = document.getElementById("btn_tab_search");
+        const btnAdmin = document.getElementById("btn_tab_admin");
+        const panelSearch = document.getElementById("panel_search");
+        const panelAdmin = document.getElementById("panel_admin");
+
+        if (tabName === 'search') {
+            btnAdmin.classList.remove("active");
+            btnSearch.classList.add("active");
+            panelAdmin.classList.remove("active");
+            setTimeout(() => { panelSearch.classList.add("active"); }, 50);
+        } else if (tabName === 'admin') {
+            btnSearch.classList.remove("active");
+            btnAdmin.classList.add("active");
+            panelSearch.classList.remove("active");
+            setTimeout(() => { 
+                panelAdmin.classList.add("active"); 
+                renderTable();
+            }, 50);
+        }
+    }
+
+    function handlePackageSelection(input) {
+        const file = input.files[0];
+        if (file) { document.getElementById("add_package_name").value = file.name; }
+    }
+
+    function loadFromLocalStorage() {
+        const localData = localStorage.getItem("led_chip_db_v6");
+        if (localData) {
+            try { currentDatabase = JSON.parse(localData); } catch (e) { currentDatabase = defaultDatabase; }
+        } else {
+            currentDatabase = defaultDatabase;
+            saveToLocalStorage();
+        }
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem("led_chip_db_v6", JSON.stringify(currentDatabase));
+        const tip = document.getElementById("storage_tip");
+        if(tip) tip.textContent = "✓ 数据已自动同步 " + new Date().toLocaleTimeString();
+    }
+
+    // 自动化保存/读取 GitHub 云端分配配置
+    function saveGitHubConfig() {
+        const config = {
+            enable: document.getElementById("gh_enable").checked,
+            user: document.getElementById("gh_user").value.trim(),
+            repo: document.getElementById("gh_repo").value.trim(),
+            branch: document.getElementById("gh_branch").value.trim(),
+            folder: document.getElementById("gh_folder").value.trim()
+        };
+        localStorage.setItem("led_github_config", JSON.stringify(config));
+    }
+
+    function loadGitHubConfig() {
+        const localConfig = localStorage.getItem("led_github_config");
+        if (localConfig) {
+            try {
+                const config = JSON.parse(localConfig);
+                document.getElementById("gh_enable").checked = config.enable || false;
+                document.getElementById("gh_user").value = config.user || "";
+                document.getElementById("gh_repo").value = config.repo || "";
+                document.getElementById("gh_branch").value = config.branch || "";
+                document.getElementById("gh_folder").value = config.folder || "";
+            } catch (e) { console.error(e); }
+        }
+    }
+
+    function refreshUI() {
+        renderTable();
+        updateDatalists();
+        document.getElementById("data_count").textContent = currentDatabase.length;
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById("database_body");
+        tbody.innerHTML = "";
+        if(currentDatabase.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#86868b; font-style:italic; padding:40px;">暂无集群数据，请录入配置。</td></tr>`;
+            return;
+        }
+        currentDatabase.forEach((row, index) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td><strong>${escapeHtml(row.module_ic)}</strong></td>
+                <td><span class="badge">${escapeHtml(row.software_ic || row.module_ic)}</span></td>
+                <td>${escapeHtml(row.card_model)}</td>
+                <td style="color:var(--sf-accent); font-weight:600;">${escapeHtml(row.version)}</td>
+                <td><span class="badge badge-package" title="${escapeHtml(row.package_name)}">📦 ${escapeHtml(row.package_name || '未绑定')}</span></td>
+                <td style="color:#86868b; font-size:13px;">${escapeHtml(row.remarks || '-')}</td>
+                <td style="text-align: center;"><button class="btn-danger" onclick="deleteRow(${index})">移除</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function updateDatalists() {
+        const driverList = document.getElementById("driver_list");
+        const cardList = document.getElementById("card_list");
+        const uniqueDrivers = [...new Set(currentDatabase.map(item => item.module_ic))];
+        const uniqueCards = [...new Set(currentDatabase.map(item => item.card_model))];
+        driverList.innerHTML = uniqueDrivers.map(d => `<option value="${d}">`).join('');
+        cardList.innerHTML = uniqueCards.map(c => `<option value="${c}">`).join('');
+    }
+
+    function executeQuery() {
+        const driverInput = document.getElementById("search_driver").value.trim().toUpperCase();
+        const cardInput = document.getElementById("search_card").value.trim().toUpperCase();
+        const resultBox = document.getElementById("result_box");
+        const resTitle = document.getElementById("res_title");
+        const resVersion = document.getElementById("res_version");
+        const resDetail = document.getElementById("res_detail");
+        const btnContainer = document.getElementById("download_btn_container");
+
+        btnContainer.innerHTML = "";
+        resultBox.classList.remove("show");
+
+        if (!driverInput && !cardInput) {
+            alert("请至少键入模组芯片或接收卡的部分型号进行模糊查询！");
+            return;
+        }
+
+        const matches = currentDatabase.filter(item => {
+            const matchDriver = driverInput ? item.module_ic.toUpperCase().includes(driverInput) : true;
+            const matchCard = cardInput ? item.card_model.toUpperCase().includes(cardInput) : true;
+            return matchDriver && matchCard;
+        });
+
+        setTimeout(() => {
+            resultBox.classList.add("show");
+            
+            if (matches.length > 0) {
+                resultBox.style.backgroundColor = "rgba(52, 199, 89, 0.04)";
+                resultBox.style.borderColor = "rgba(52, 199, 89, 0.2)";
+                
+                // 情况一：恰好模糊匹配到唯一的完美答案
+                if (matches.length === 1) {
+                    const match = matches[0];
+                    resTitle.textContent = "最佳匹配固件版本";
+                    resVersion.style.display = "block";
+                    resVersion.textContent = match.version;
+                    resVersion.style.color = "var(--sf-success)";
+                    
+                    resDetail.innerHTML = `
+                        <p style="margin-bottom:6px;"><strong>芯片型号:</strong> ${escapeHtml(match.module_ic)}</p>
+                        <p style="margin-bottom:6px;"><strong>软件可选 IC:</strong> ${escapeHtml(match.software_ic || '通用')}</p>
+                        <p style="margin-bottom:6px;"><strong>接收卡端:</strong> ${escapeHtml(match.card_model)}</p>
+                        <p style="margin-bottom:6px;"><strong>程序资产:</strong> ${escapeHtml(match.package_name || '未绑定')}</p>
+                        <p><strong>版本备注:</strong> ${escapeHtml(match.remarks || '无特别版本说明')}</p>
+                    `;
+                    
+                    if (match.package_name) {
+                        const downloadBtn = document.createElement("button");
+                        downloadBtn.className = "btn";
+                        downloadBtn.style.marginTop = "16px";
+                        downloadBtn.innerHTML = `📥 下载云端固件包 (${match.package_name})`;
+                        downloadBtn.onclick = function() { triggerLocalDownload(match.package_name); };
+                        btnContainer.appendChild(downloadBtn);
+                    }
+                } 
+                // 情况二：模糊匹配命中多个关联选项
+                else {
+                    resTitle.textContent = `模糊检索成功：为您找到 ${matches.length} 个匹配结果`;
+                    resVersion.style.display = "none";
+                    
+                    let listHtml = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">`;
+                    matches.forEach(match => {
+                        listHtml += `
+                            <div class="fuzzy-card">
+                                <div style="display:flex; justify-content:between; align-items:center; justify-content: space-between; margin-bottom:6px;">
+                                    <span style="font-weight:600; font-size:15px; color:var(--sf-black);">${escapeHtml(match.module_ic)} ➔ ${escapeHtml(match.card_model)}</span>
+                                    <span style="color:var(--sf-accent); font-weight:600; font-size:14px;">${escapeHtml(match.version)}</span>
+                                </div>
+                                <div style="font-size:12px; color:var(--sf-gray-dark); margin-bottom:10px; line-height:1.4;">
+                                    软件可选IC: ${escapeHtml(match.software_ic || '通用')} | 备注: ${escapeHtml(match.remarks || '-')}
+                                </div>
+                                ${match.package_name ? `
+                                    <button class="btn btn-outline" style="padding:6px 12px; width:auto; font-size:12px; display:inline-block;" 
+                                        onclick="triggerLocalDownload('${escapeHtml(match.package_name)}')">
+                                        📥 下载 (${escapeHtml(match.package_name)})
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                    listHtml += `</div>`;
+                    resDetail.innerHTML = listHtml;
+                }
+            } else {
+                // 情况三：完全没捞到任何数据
+                resTitle.textContent = "检索结果说明";
+                resVersion.style.display = "block";
+                resVersion.textContent = "未匹配到相关规则";
+                resDetail.textContent = `矩阵索引中找不到包含 [芯片: ${driverInput || '任意'}] + [控制卡: ${cardInput || '任意'}] 的任何记录。请前往数据仓库扩充规则。`;
+                resultBox.style.backgroundColor = "rgba(255, 59, 48, 0.04)";
+                resultBox.style.borderColor = "rgba(255, 59, 48, 0.2)";
+                resVersion.style.color = "var(--sf-danger)";
+            }
+        }, 150);
+    }
+
+    // 升级核心：智能识别并组装 GitHub 与本地地址的下载器
+    function triggerLocalDownload(fileName) {
+        const isGitHub = document.getElementById("gh_enable").checked;
+        let fileUrl = "./packages/" + fileName;
+
+        if (isGitHub) {
+            const user = document.getElementById("gh_user").value.trim();
+            const repo = document.getElementById("gh_repo").value.trim();
+            const branch = document.getElementById("gh_branch").value.trim() || "main";
+            const folder = document.getElementById("gh_folder").value.trim() || "packages";
+
+            if (!user || !repo) {
+                alert("⚠ 您已启用 GitHub 下载，但未填写【用户名】或【仓库名称】。系统已自动切回本地模式。");
+                fileUrl = "./packages/" + fileName;
+            } else {
+                // 精准组装 GitHub 开放 CDN 直连链接
+                const folderPath = folder ? folder + "/" : "";
+                fileUrl = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${folderPath}${fileName}`;
+            }
+        }
+
+        const invisibleLink = document.createElement("a");
+        invisibleLink.href = fileUrl;
+        invisibleLink.download = fileName;
+        invisibleLink.target = "_blank"; 
+        
+        document.body.appendChild(invisibleLink);
+        invisibleLink.click(); 
+        document.body.removeChild(invisibleLink);
+    }
+
+    function addNewData() {
+        const module_ic = document.getElementById("add_module_ic").value.trim();
+        const software_ic = document.getElementById("add_software_ic").value.trim();
+        const card_model = document.getElementById("add_card_model").value.trim();
+        const version = document.getElementById("add_version").value.trim();
+        const package_name = document.getElementById("add_package_name").value.trim();
+        const remarks = document.getElementById("add_remarks").value.trim();
+
+        if(!module_ic || !card_model || !version || !package_name) {
+            alert("请完整填写必要的核心字段信息！");
+            return;
+        }
+
+        const matchedIndex = currentDatabase.findIndex(item => 
+            item.module_ic.toUpperCase() === module_ic.toUpperCase() && 
+            item.card_model.toUpperCase() === card_model.toUpperCase()
+        );
+
+        const dataRow = { module_ic, software_ic: software_ic || module_ic, card_model, version, package_name, remarks };
+
+        if(matchedIndex > -1) {
+            if(!confirm("检测到该配对组合已存在，是否重写并覆盖其版本规则？")) return;
+            currentDatabase[matchedIndex] = dataRow;
+        } else {
+            currentDatabase.unshift(dataRow);
+        }
+
+        saveToLocalStorage();
+        refreshUI();
+        
+        document.getElementById("add_module_ic").value = "";
+        document.getElementById("add_software_ic").value = "";
+        document.getElementById("add_card_model").value = "";
+        document.getElementById("add_version").value = "";
+        document.getElementById("add_package_name").value = "";
+        document.getElementById("add_remarks").value = "";
+    }
+
+    function deleteRow(index) {
+        if(confirm("确认永久从集群矩阵中卸载该配置吗？")) {
+            currentDatabase.splice(index, 1);
+            saveToLocalStorage();
+            refreshUI();
+        }
+    }
+
+    function clearStorageData() {
+        if(confirm("此项操作将抹除所有本地数据映射，是否确认复位系统？")) {
+            localStorage.removeItem("led_chip_db_v6");
+            currentDatabase = [...defaultDatabase];
+            saveToLocalStorage();
+            refreshUI();
+        }
+    }
+
+    function exportToCSV() {
+        if (currentDatabase.length === 0) return;
+        let csvContent = "\uFEFF模组驱动IC,软件可选IC,接收卡型号,程序版本号,固件程序包,备注\n";
+        currentDatabase.forEach(item => {
+            let row = [`"${item.module_ic}"`, `"${item.software_ic || ''}"`, `"${item.card_model}"`, `"${item.version}"`, `"${item.package_name || ''}"`, `"${item.remarks || ''}"` ];
+            csvContent += row.join(",") + "\n";
+        });
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", "LED_Matrix_Storage_Backup.csv");
+        link.click();
+    }
+
+    function importFromCSV(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const tempReader = new FileReader();
+        tempReader.onload = function(evt) {
+            const bytes = new Uint8Array(evt.target.result);
+            let encoding = "GBK"; 
+            if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) { encoding = "UTF-8"; }
+            
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const lines = e.target.result.split(/\r?\n/);
+                const newDatabase = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    const cells = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+                    if (cells.length >= 5) {
+                        newDatabase.push({ module_ic: cells[0], software_ic: cells[1] || cells[0], card_model: cells[2], version: cells[3], package_name: cells[4], remarks: cells[5] || '' });
+                    }
+                }
+                if (newDatabase.length > 0 && confirm(`已深度扫描到 ${newDatabase.length} 条集群规则，是否覆盖同步？`)) {
+                    currentDatabase = newDatabase;
+                    saveToLocalStorage();
+                    refreshUI();
+                }
+                input.value = "";
+            };
+            reader.readAsText(file, encoding);
+        };
+        tempReader.readAsArrayBuffer(file.slice(0, 3));
+    }
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+</script>
+
+</body>
+</html>
