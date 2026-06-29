@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LED 固件智能生态查询系统 v6.6</title>
+    <title>LED 固件智能生态查询系统 v6.8 智能对齐版</title>
     <style>
         :root {
             --sf-black: #1d1d1f;
@@ -26,12 +26,12 @@
         
         .container { width: 100%; max-width: 900px; margin: 0 auto; }
         
-        /* 苹果标志性居中极简 Header */
+        /* Header */
         header { margin-bottom: 40px; text-align: center; animation: fadeInHeader 0.8s var(--ease-apple); }
         header h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.5px; color: var(--sf-black); margin-bottom: 10px; }
         header p { color: var(--sf-gray-dark); font-size: 16px; font-weight: 400; }
         
-        /* 苹果胶囊式无缝切换导航条 */
+        /* 导航条 */
         .nav-tabs-container { display: flex; justify-content: center; margin-bottom: 40px; }
         .nav-tabs { display: inline-flex; background: rgba(0, 0, 0, 0.05); padding: 4px; border-radius: 30px; backdrop-filter: blur(20px); position: relative; }
         .tab-btn { padding: 8px 32px; font-size: 14px; font-weight: 500; border: none; background: transparent; color: var(--sf-gray-dark); cursor: pointer; border-radius: 25px; transition: all 0.3s var(--ease-apple); outline: none; }
@@ -43,11 +43,11 @@
         .page-panel { width: 100%; position: absolute; top: 0; left: 0; opacity: 0; transform: translateY(15px) scale(0.99); pointer-events: none; transition: opacity 0.4s var(--ease-apple), transform 0.4s var(--ease-apple); }
         .page-panel.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; position: relative; }
         
-        /* 经典苹果圆角白色微阴影卡片 */
+        /* 卡片 */
         .card { background: var(--sf-card-bg); border-radius: var(--radius-main); border: 1px solid rgba(0,0,0,0.03); padding: 36px; box-shadow: 0 8px 30px rgb(0 0 0 / 4%); backdrop-filter: blur(20px); margin-bottom: 25px; }
         .card-title { font-size: 18px; font-weight: 600; margin-bottom: 24px; color: var(--sf-black); letter-spacing: -0.2px; }
         
-        /* 苹果风输入框组 */
+        /* 输入框组 */
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; color: var(--sf-gray-dark); padding-left: 2px; }
         .input-container { position: relative; width: 100%; }
@@ -55,7 +55,7 @@
         .form-control:focus { border-color: var(--sf-accent); background-color: #fff; box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15); }
         .form-control::placeholder { color: #86868b; font-weight: 400; }
 
-        /* 交互按钮组 */
+        /* 按钮 */
         .btn { width: 100%; padding: 14px; background-color: var(--sf-accent); color: white; border: none; border-radius: var(--radius-inner); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s var(--ease-apple); text-align: center; text-decoration: none; display: block; }
         .btn:hover { background-color: var(--sf-accent-hover); }
         .btn:active { transform: scale(0.985); opacity: 0.95; }
@@ -97,7 +97,6 @@
         .hidden-file-input { display: none; }
         .search-card-width { max-width: 550px; margin: 0 auto; }
 
-        /* 模糊匹配多结果卡片样式 */
         .fuzzy-card { background: #fff; border: 1px solid rgba(0,0,0,0.06); padding: 14px; border-radius: var(--radius-inner); box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 10px; transition: transform 0.2s; }
         .fuzzy-card:hover { transform: translateY(-2px); border-color: rgba(0, 113, 227, 0.2); }
 
@@ -198,7 +197,7 @@
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title">数据备份与导入</div>
                         <p style="font-size: 13px; color: var(--sf-gray-dark); margin-bottom: 20px; line-height: 1.6;">
-                            系统无缝向下兼容标准 Excel (CSV) 编码。您可以一键备份云端规则，或批量下发外部配置文件。
+                            系统无缝向下兼容标准 Excel (CSV) 编码。
                         </p>
                         <div class="file-ops">
                             <button class="btn btn-outline" onclick="exportToCSV()">备份数据 (CSV)</button>
@@ -211,30 +210,38 @@
 
                     <div class="card" style="margin-bottom: 0;">
                         <div class="card-title">🌐 GitHub 云端分发源配置</div>
-                        <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
-                            <input type="checkbox" id="gh_enable" onchange="saveGitHubConfig()" style="width:18px; height:18px; cursor:pointer;">
-                            <label for="gh_enable" style="margin-bottom:0; cursor:pointer; font-weight:600; color:var(--sf-accent);">启用 GitHub 远程下载</label>
+                        <div class="form-group" style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid var(--sf-gray-light); padding-bottom: 12px;">
+                            <label style="margin-bottom:0; cursor:pointer; font-weight:600; color:var(--sf-accent); display:flex; align-items:center; gap:4px;">
+                                <input type="checkbox" id="gh_enable" onchange="saveGitHubConfig()" style="width:16px; height:16px; cursor:pointer;"> 启用远程下载
+                            </label>
+                            <label style="margin-bottom:0; cursor:pointer; font-weight:600; color:var(--sf-danger); display:flex; align-items:center; gap:4px;">
+                                <input type="checkbox" id="gh_private" onchange="saveGitHubConfig()" style="width:16px; height:16px; cursor:pointer;"> 这是私有仓库
+                            </label>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div class="form-group" style="margin-bottom:10px;">
                                 <label>GitHub 用户名</label>
-                                <input type="text" id="gh_user" class="form-control" placeholder="例如: zhangsan" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
+                                <input type="text" id="gh_user" class="form-control" placeholder="如: zhangsan" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
                             </div>
                             <div class="form-group" style="margin-bottom:10px;">
                                 <label>仓库名称</label>
-                                <input type="text" id="gh_repo" class="form-control" placeholder="例如: led-firmware" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
+                                <input type="text" id="gh_repo" class="form-control" placeholder="如: led-repo" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
                             </div>
-                            <div class="form-group" style="margin-bottom:0;">
+                            <div class="form-group" style="margin-bottom:10px;">
                                 <label>分支 (默认 main)</label>
                                 <input type="text" id="gh_branch" class="form-control" placeholder="main" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
                             </div>
-                            <div class="form-group" style="margin-bottom:0;">
+                            <div class="form-group" style="margin-bottom:10px;">
                                 <label>目录 (默认 packages)</label>
                                 <input type="text" id="gh_folder" class="form-control" placeholder="packages" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
                             </div>
                         </div>
+                        <div class="form-group" style="margin-bottom:0; margin-top:5px;">
+                            <label style="color:var(--sf-accent);">🔑 GitHub 访问令牌 (Token) *选填</label>
+                            <input type="password" id="gh_token" class="form-control" placeholder="公开仓频繁下载建议填写，私有仓必填" oninput="saveGitHubConfig()" style="padding:10px 12px; font-size:14px;">
+                        </div>
                         <p style="font-size: 11px; color: #86868b; margin-top: 12px; line-height: 1.4;">
-                            * 提示：开启后，下载时系统会自动组装为 <code>raw.githubusercontent</code> 高速直连链。请确保您的目标仓库为 <b>Public (公开)</b> 状态。
+                            * 提示：录入的文件名只需与云端文件的前面大体一致（如 `abc.bin`），即使云端实际带有后缀说明（如 `abc(2026版).bin`），系统也会通过智能对齐机制自动匹配并拉取下载。
                         </p>
                     </div>
                 </div>
@@ -274,7 +281,7 @@
 
     window.onload = function() {
         loadFromLocalStorage();
-        loadGitHubConfig(); // 载入 GitHub 配置
+        loadGitHubConfig(); 
         refreshUI();
     };
 
@@ -321,28 +328,31 @@
         if(tip) tip.textContent = "✓ 数据已自动同步 " + new Date().toLocaleTimeString();
     }
 
-    // 自动化保存/读取 GitHub 云端分配配置
     function saveGitHubConfig() {
         const config = {
             enable: document.getElementById("gh_enable").checked,
+            isPrivate: document.getElementById("gh_private").checked,
             user: document.getElementById("gh_user").value.trim(),
             repo: document.getElementById("gh_repo").value.trim(),
             branch: document.getElementById("gh_branch").value.trim(),
-            folder: document.getElementById("gh_folder").value.trim()
+            folder: document.getElementById("gh_folder").value.trim(),
+            token: document.getElementById("gh_token").value.trim()
         };
-        localStorage.setItem("led_github_config", JSON.stringify(config));
+        localStorage.setItem("led_github_config_v67", JSON.stringify(config));
     }
 
     function loadGitHubConfig() {
-        const localConfig = localStorage.getItem("led_github_config");
+        const localConfig = localStorage.getItem("led_github_config_v67");
         if (localConfig) {
             try {
                 const config = JSON.parse(localConfig);
                 document.getElementById("gh_enable").checked = config.enable || false;
+                document.getElementById("gh_private").checked = config.isPrivate || false;
                 document.getElementById("gh_user").value = config.user || "";
                 document.getElementById("gh_repo").value = config.repo || "";
                 document.getElementById("gh_branch").value = config.branch || "";
                 document.getElementById("gh_folder").value = config.folder || "";
+                document.getElementById("gh_token").value = config.token || "";
             } catch (e) { console.error(e); }
         }
     }
@@ -357,7 +367,7 @@
         const tbody = document.getElementById("database_body");
         tbody.innerHTML = "";
         if(currentDatabase.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#86868b; font-style:italic; padding:40px;">暂无集群数据，请录入配置。</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#86868b; font-style:italic; padding:40px;">暂无集群数据。</td></tr>`;
             return;
         }
         currentDatabase.forEach((row, index) => {
@@ -414,7 +424,6 @@
                 resultBox.style.backgroundColor = "rgba(52, 199, 89, 0.04)";
                 resultBox.style.borderColor = "rgba(52, 199, 89, 0.2)";
                 
-                // 情况一：恰好模糊匹配到唯一的完美答案
                 if (matches.length === 1) {
                     const match = matches[0];
                     resTitle.textContent = "最佳匹配固件版本";
@@ -426,26 +435,26 @@
                         <p style="margin-bottom:6px;"><strong>芯片型号:</strong> ${escapeHtml(match.module_ic)}</p>
                         <p style="margin-bottom:6px;"><strong>软件可选 IC:</strong> ${escapeHtml(match.software_ic || '通用')}</p>
                         <p style="margin-bottom:6px;"><strong>接收卡端:</strong> ${escapeHtml(match.card_model)}</p>
-                        <p style="margin-bottom:6px;"><strong>程序资产:</strong> ${escapeHtml(match.package_name || '未绑定')}</p>
+                        <p style="margin-bottom:6px;"><strong>登记短名称:</strong> ${escapeHtml(match.package_name || '未绑定')}</p>
                         <p><strong>版本备注:</strong> ${escapeHtml(match.remarks || '无特别版本说明')}</p>
                     `;
                     
                     if (match.package_name) {
                         const downloadBtn = document.createElement("button");
                         downloadBtn.className = "btn";
+                        downloadBtn.id = "main_dl_btn";
                         downloadBtn.style.marginTop = "16px";
                         downloadBtn.innerHTML = `📥 下载云端固件包 (${match.package_name})`;
-                        downloadBtn.onclick = function() { triggerLocalDownload(match.package_name); };
+                        downloadBtn.onclick = function() { triggerLocalDownload(match.package_name, "main_dl_btn"); };
                         btnContainer.appendChild(downloadBtn);
                     }
                 } 
-                // 情况二：模糊匹配命中多个关联选项
                 else {
                     resTitle.textContent = `模糊检索成功：为您找到 ${matches.length} 个匹配结果`;
                     resVersion.style.display = "none";
                     
                     let listHtml = `<div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">`;
-                    matches.forEach(match => {
+                    matches.forEach((match, idx) => {
                         listHtml += `
                             <div class="fuzzy-card">
                                 <div style="display:flex; justify-content:between; align-items:center; justify-content: space-between; margin-bottom:6px;">
@@ -456,8 +465,8 @@
                                     软件可选IC: ${escapeHtml(match.software_ic || '通用')} | 备注: ${escapeHtml(match.remarks || '-')}
                                 </div>
                                 ${match.package_name ? `
-                                    <button class="btn btn-outline" style="padding:6px 12px; width:auto; font-size:12px; display:inline-block;" 
-                                        onclick="triggerLocalDownload('${escapeHtml(match.package_name)}')">
+                                    <button class="btn btn-outline" id="fuzzy_btn_${idx}" style="padding:6px 12px; width:auto; font-size:12px; display:inline-block;" 
+                                        onclick="triggerLocalDownload('${escapeHtml(match.package_name)}', 'fuzzy_btn_${idx}')">
                                         📥 下载 (${escapeHtml(match.package_name)})
                                     </button>
                                 ` : ''}
@@ -468,11 +477,10 @@
                     resDetail.innerHTML = listHtml;
                 }
             } else {
-                // 情况三：完全没捞到任何数据
                 resTitle.textContent = "检索结果说明";
                 resVersion.style.display = "block";
                 resVersion.textContent = "未匹配到相关规则";
-                resDetail.textContent = `矩阵索引中找不到包含 [芯片: ${driverInput || '任意'}] + [控制卡: ${cardInput || '任意'}] 的任何记录。请前往数据仓库扩充规则。`;
+                resDetail.textContent = `矩阵索引中找不到包含 [芯片: ${driverInput || '任意'}] + [控制卡: ${cardInput || '任意'}] 的任何记录。`;
                 resultBox.style.backgroundColor = "rgba(255, 59, 48, 0.04)";
                 resultBox.style.borderColor = "rgba(255, 59, 48, 0.2)";
                 resVersion.style.color = "var(--sf-danger)";
@@ -480,27 +488,112 @@
         }, 150);
     }
 
-    // 升级核心：智能识别并组装 GitHub 与本地地址的下载器
-    function triggerLocalDownload(fileName) {
+    // V6.8 核心升级：带有智能前缀对齐算法的云端下载器
+    async function triggerLocalDownload(fileName, btnId) {
         const isGitHub = document.getElementById("gh_enable").checked;
+        const isPrivate = document.getElementById("gh_private").checked;
         let fileUrl = "./packages/" + fileName;
+
+        const targetBtn = document.getElementById(btnId);
+        const originalBtnText = targetBtn ? targetBtn.innerHTML : "";
 
         if (isGitHub) {
             const user = document.getElementById("gh_user").value.trim();
             const repo = document.getElementById("gh_repo").value.trim();
             const branch = document.getElementById("gh_branch").value.trim() || "main";
             const folder = document.getElementById("gh_folder").value.trim() || "packages";
+            const token = document.getElementById("gh_token").value.trim();
 
             if (!user || !repo) {
                 alert("⚠ 您已启用 GitHub 下载，但未填写【用户名】或【仓库名称】。系统已自动切回本地模式。");
                 fileUrl = "./packages/" + fileName;
             } else {
-                // 精准组装 GitHub 开放 CDN 直连链接
-                const folderPath = folder ? folder + "/" : "";
-                fileUrl = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${folderPath}${fileName}`;
+                if (targetBtn) {
+                    targetBtn.innerHTML = "⏳ 正在智能检索云端真实文件...";
+                    targetBtn.style.opacity = "0.7";
+                    targetBtn.disabled = true;
+                }
+
+                try {
+                    // 1. 调用 GitHub API 获取云端指定文件夹下的所有真实文件
+                    const apiFolder = folder ? `/${folder}` : "";
+                    const apiUrl = `https://api.github.com/repos/${user}/${repo}/contents${apiFolder}?ref=${branch}`;
+                    
+                    const headers = {};
+                    // 如果填写了 Token，不论公开仓还是私有仓都带上，能大幅提高 GitHub API 每小时请求限制
+                    if (token) { headers['Authorization'] = `token ${token}`; }
+
+                    const apiResponse = await fetch(apiUrl, { headers });
+                    if (!apiResponse.ok) {
+                        if (apiResponse.status === 403) throw new Error("触发 GitHub 频次限制。请在后台配置中填写任意 GitHub Token 即可解除限制。");
+                        throw new Error(`云端目录无法读取，状态码: ${apiResponse.status}。请核对仓库信息及目录名。`);
+                    }
+
+                    const filesList = await apiResponse.ok ? await apiResponse.json() : [];
+                    
+                    // 2. 核心智能算法：提取本地录入名字的主干和后缀（剥离后缀）
+                    const lastDot = fileName.lastIndexOf('.');
+                    const dbBaseName = lastDot !== -1 ? fileName.substring(0, lastDot).toLowerCase() : fileName.toLowerCase();
+                    const dbExt = lastDot !== -1 ? fileName.substring(lastDot).toLowerCase() : "";
+
+                    // 寻找云端是否有文件是以这个主干开头，且后缀相同的
+                    let realCloudName = fileName; 
+                    if (Array.isArray(filesList)) {
+                        const matchedFile = filesList.find(f => {
+                            if (f.type !== "file") return false;
+                            const cloudNameLower = f.name.toLowerCase();
+                            // 规则：云端文件名以本地主干开头，并且扩展名相同
+                            return cloudNameLower.startsWith(dbBaseName) && cloudNameLower.endsWith(dbExt);
+                        });
+                        if (matchedFile) {
+                            realCloudName = matchedFile.name; // 成功捕获到云端真实的长文件名！
+                            console.log(`[智能对齐成功] 录入短名: ${fileName} ➔ 匹配云端长名: ${realCloudName}`);
+                        }
+                    }
+
+                    // 3. 构建最终真实的下载直连地址
+                    const folderPath = folder ? folder + "/" : "";
+                    fileUrl = `https://raw.githubusercontent.com/${user}/${repo}/${branch}/${folderPath}${encodeURIComponent(realCloudName)}`;
+                    
+                    // 4. 处理私有仓库下载或需要流式下载的场景
+                    if (isPrivate) {
+                        if (!token) throw new Error("这是私有仓库，请先在配置中填入访问令牌 (Token)！");
+                        if (targetBtn) targetBtn.innerHTML = "⏳ 正在构建安全加密通道下载...";
+                        
+                        const response = await fetch(fileUrl, { headers: { 'Authorization': `token ${token}` } });
+                        if (!response.ok) throw new Error(`私有下载失败，服务器返回 ${response.status}`);
+
+                        const blob = await response.blob();
+                        const blobUrl = URL.createObjectURL(blob);
+                        const invisibleLink = document.createElement("a");
+                        invisibleLink.href = blobUrl;
+                        invisibleLink.download = realCloudName;
+                        document.body.appendChild(invisibleLink);
+                        invisibleLink.click();
+                        document.body.removeChild(invisibleLink);
+                        URL.revokeObjectURL(blobUrl);
+                        return;
+                    }
+
+                } catch (error) {
+                    alert("❌ 云端匹配引擎异常：\n" + error.message);
+                    if (targetBtn) {
+                        targetBtn.innerHTML = originalBtnText;
+                        targetBtn.style.opacity = "1";
+                        targetBtn.disabled = false;
+                    }
+                    return;
+                } finally {
+                    if (!isPrivate && targetBtn) {
+                        targetBtn.innerHTML = originalBtnText;
+                        targetBtn.style.opacity = "1";
+                        targetBtn.disabled = false;
+                    }
+                }
             }
         }
 
+        // 公开仓库或本地模式最终通过链接触发下载
         const invisibleLink = document.createElement("a");
         invisibleLink.href = fileUrl;
         invisibleLink.download = fileName;
